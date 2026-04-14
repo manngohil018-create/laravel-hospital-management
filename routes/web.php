@@ -46,14 +46,11 @@ Route::get('/contact', function () {
 })->name('contact');
 
 // Book Appointment Route
-Route::get('/book-appointment/{doctor?}', function ($doctorId = null) {
-    $doctors = \App\Models\Doctor::all();
-    $selectedDoctor = null;
-    if ($doctorId) {
-        $selectedDoctor = \App\Models\Doctor::find($doctorId);
-    }
-    return view('book-appointment', compact('doctors', 'selectedDoctor'));
-})->name('book-appointment');
+Route::get('/book-appointment/{doctor?}', [AppointmentController::class, 'create'])
+    ->name('book-appointment');
+
+Route::get('/appointment/available-slots', [AppointmentController::class, 'availableSlots'])
+    ->name('appointment.available-slots');
 
 /*
 |--------------------------------------------------------------------------

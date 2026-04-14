@@ -101,6 +101,67 @@
         padding: 40px;
         color: #999;
     }
+
+    /* Pagination override for Laravel default Tailwind links */
+    nav[role="navigation"] {
+        display: flex;
+        justify-content: center;
+        padding: 20px 0 0;
+    }
+
+    nav[role="navigation"] .inline-flex {
+        display: inline-flex;
+        flex-wrap: wrap;
+        gap: 4px;
+        align-items: center;
+        justify-content: center;
+    }
+
+    nav[role="navigation"] .inline-flex.items-center {
+        align-items: center;
+    }
+
+    nav[role="navigation"] a,
+    nav[role="navigation"] span {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 8px 12px;
+        min-width: 40px;
+        min-height: 40px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        font-size: 14px;
+        color: #333;
+        text-decoration: none;
+        background: #fff;
+    }
+
+    nav[role="navigation"] a:hover {
+        background: #f4f7fc;
+        color: #003d7a;
+    }
+
+    nav[role="navigation"] span[aria-disabled="true"] {
+        cursor: default;
+        opacity: 0.65;
+        background: #f7f7f7;
+    }
+
+    nav[role="navigation"] svg {
+        width: 18px;
+        height: 18px;
+    }
+
+    nav[role="navigation"] .rounded-l-md {
+        border-top-left-radius: 8px;
+        border-bottom-left-radius: 8px;
+    }
+
+    nav[role="navigation"] .rounded-r-md {
+        border-top-right-radius: 8px;
+        border-bottom-right-radius: 8px;
+    }
 </style>
 
 <div class="header">
@@ -162,7 +223,7 @@
 
     <!-- Pagination -->
     <div style="padding: 20px; text-align: center;">
-        {{ $appointments->links() }}
+        {{ $appointments->links('vendor.pagination.admin') }}
     </div>
     @else
     <div class="empty">

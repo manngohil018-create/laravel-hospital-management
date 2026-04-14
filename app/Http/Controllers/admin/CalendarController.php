@@ -10,11 +10,18 @@ use Carbon\Carbon;
 
 class CalendarController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $doctors = Doctor::all();
         $statuses = ['pending', 'confirmed', 'completed', 'cancelled'];
-        $appointments = Appointment::with(['patient', 'doctor'])->get();
+        $appointments = Appointment::with(['patient', 'doctor'])
+            ->when($request->doctor_id, function ($query, $doctorId) {
+                return $query->where('doctor_id', $doctorId);
+            })
+            ->when($request->status, function ($query, $status) {
+                return $query->where('status', $status);
+            })
+            ->get();
         
         return view('admin.calendar.index', compact('doctors', 'statuses', 'appointments'));
     }

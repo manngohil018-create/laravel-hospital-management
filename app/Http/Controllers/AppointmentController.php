@@ -10,10 +10,81 @@ use Carbon\Carbon;
 
 class AppointmentController extends Controller
 {
-    public function create()
+    public function create($doctorId = null)
     {
         $doctors = Doctor::all();
-        return view('patient.appointment.create', compact('doctors'));
+        $selectedDoctor = null;
+        if ($doctorId) {
+            $selectedDoctor = Doctor::find($doctorId);
+        }
+
+        return view('book-appointment', compact('doctors', 'selectedDoctor'));
+    }
+
+    public function availableSlots(Request $request)
+    {
+        $request->validate([
+            'doctor_id' => 'required|exists:doctors,id',
+            'date' => 'required|date_format:Y-m-d',
+            'is_emergency' => 'nullable|boolean',
+        ]);
+
+        $date = Carbon::createFromFormat('Y-m-d', $request->date);
+        $isEmergency = $request->boolean('is_emergency');
+        $now = Carbon::now();
+
+        $startTime = $isEmergency ? $date->copy()->setTime(0, 0, 0) : $date->copy()->setTime(9, 0, 0);
+        $endTime = $isEmergency ? $date->copy()->setTime(23, 40, 0) : $date->copy()->setTime(21, 0, 0);
+
+        $slots = [];
+        for ($slot = $startTime->copy(); $slot->lte($endTime); $slot->addMinutes(20)) {
+            if ($date->isToday() && $slot->lte($now)) {
+                continue;
+            }
+
+            $slots[] = [
+                'time' => $slot->format('H:i'),
+                'label' => $slot->format('h:i A'),
+                'available' => true,
+            ];
+        }
+
+        $doctorAppointments = Appointment::where('doctor_id', $request->doctor_id)
+            ->whereDate('appointment_date', $date->toDateString())
+            ->whereIn('status', ['pending', 'confirmed'])
+            ->get();
+
+        $userAppointments = collect();
+        if (Auth::check()) {
+            $userAppointments = Appointment::where('patient_id', Auth::id())
+                ->whereDate('appointment_date', $date->toDateString())
+                ->where('status', '!=', 'cancelled')
+                ->get();
+        }
+
+        foreach ($slots as &$slot) {
+            $slotTime = Carbon::createFromFormat('Y-m-d H:i', $date->format('Y-m-d').' '.$slot['time']);
+
+            foreach ($doctorAppointments as $appointment) {
+                $appointmentTime = Carbon::parse($appointment->appointment_date);
+                if (abs($slotTime->diffInMinutes($appointmentTime, false)) <= 20) {
+                    $slot['available'] = false;
+                    break;
+                }
+            }
+
+            if ($slot['available']) {
+                foreach ($userAppointments as $appointment) {
+                    $appointmentTime = Carbon::parse($appointment->appointment_date);
+                    if (abs($slotTime->diffInMinutes($appointmentTime, false)) <= 20) {
+                        $slot['available'] = false;
+                        break;
+                    }
+                }
+            }
+        }
+
+        return response()->json(['slots' => $slots]);
     }
 
     public function store(Request $request)
@@ -46,12 +117,27 @@ class AppointmentController extends Controller
                 ->withInput();
         }
 
-        // Regular appointments may only be booked from tomorrow 9:00 AM onward.
-        $regularBookingStart = Carbon::now()->copy()->addDay()->setTime(9, 0, 0);
-        if (! $isEmergency && $appointmentCarbon->lt($regularBookingStart)) {
-            return redirect()->back()
-                ->with('error', 'Regular appointments can only be booked from tomorrow 9:00 AM onward. For urgent care, select Emergency Appointment.')
-                ->withInput();
+        if (! $isEmergency) {
+            $openingTime = $appointmentCarbon->copy()->setTime(9, 0, 0);
+            $closingTime = $appointmentCarbon->copy()->setTime(21, 0, 0);
+
+            if ($appointmentCarbon->lt($openingTime) || $appointmentCarbon->gt($closingTime)) {
+                return redirect()->back()
+                    ->with('error', 'Regular appointments can only be booked between 9:00 AM and 9:00 PM. Please choose a time within this range.')
+                    ->withInput();
+            }
+
+            if ($appointmentCarbon->isSameDay(Carbon::today()) && $appointmentCarbon->lte(Carbon::now())) {
+                return redirect()->back()
+                    ->with('error', 'Please choose a future time for today. Regular appointments can be booked today between 9:00 AM and 9:00 PM.')
+                    ->withInput();
+            }
+
+            if ($appointmentCarbon->isAfter(Carbon::today()->setTime(21,0,0)) && $appointmentCarbon->diffInDays(Carbon::today()) === 0) {
+                return redirect()->back()
+                    ->with('error', 'Today’s booking window has closed. Please choose another day between 9:00 AM and 9:00 PM, or select Emergency Appointment if urgent.')
+                    ->withInput();
+            }
         }
 
         // Do not allow appointments within 20 minutes of another appointment for the same user

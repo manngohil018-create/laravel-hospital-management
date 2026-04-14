@@ -203,16 +203,62 @@ section h2::after {
     min-height: 80px;
 }
 
-.emergency-row {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    margin-bottom: 20px;
-}
+    .slot-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 10px;
+    }
 
-.emergency-checkbox {
-    display: inline-flex;
-    align-items: center;
+    .slot-button {
+        border: 1px solid #ddd;
+        background: white;
+        color: #333;
+        padding: 10px 14px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        min-width: 90px;
+        text-align: center;
+        font-weight: 600;
+    }
+
+    .slot-button.available:hover {
+        border-color: #667eea;
+        background: #eef2ff;
+    }
+
+    .slot-button.selected {
+        background: #667eea;
+        color: white;
+        border-color: #5050d4;
+    }
+
+    .slot-button.unavailable {
+        background: #f8f9fa;
+        color: #999;
+        border-color: #dee2e6;
+        cursor: not-allowed;
+    }
+
+    .slot-placeholder {
+        color: #666;
+        margin: 10px 0;
+    }
+
+    .slot-message {
+        margin-top: 10px;
+        color: #555;
+        font-size: 14px;
+    }
+
+    .slot-selected-label {
+        margin-top: 10px;
+        font-size: 14px;
+        font-weight: 600;
+        color: #333;
+    }
+
     gap: 10px;
     font-weight: 600;
     font-size: 15px;
@@ -405,8 +451,18 @@ footer {
                     </div>
 
                     <div class="form-group">
-                        <label for="appointment_date">Select Date & Time</label>
-                        <input type="datetime-local" name="appointment_date" id="appointment_date" required min="">
+                        <label for="appointment_date_date">Select Date</label>
+                        <input type="date" name="appointment_date_date" id="appointment_date_date" required
+                               value="{{ old('appointment_date_date', \Carbon\Carbon::now()->format('Y-m-d')) }}"
+                               min="{{ \Carbon\Carbon::now()->format('Y-m-d') }}">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Select Time Slot</label>
+                        <div id="slot-container" class="slot-container">
+                            <p class="slot-placeholder">Choose a doctor and date to see available 20-minute slots.</p>
+                        </div>
+                        <input type="hidden" name="appointment_date" id="appointment_date" value="{{ old('appointment_date') }}">
                     </div>
 
                     <div class="form-group">
@@ -460,7 +516,7 @@ footer {
                     @endif
 
                     <div style="background: #e3f2fd; color: #1565c0; padding: 15px; border-radius: 5px; margin-bottom: 20px; border-left: 4px solid #1565c0;">
-                        <i class="fas fa-info-circle"></i> <strong>Note:</strong> Each doctor can only have one appointment per time slot. Emergency appointments are available 24/7 and can be booked immediately, including on Sundays and outside normal hours.
+                        <i class="fas fa-info-circle"></i> <strong>Note:</strong> Regular appointments show available 20-minute slots between 9:00 AM and 9:00 PM. Emergency appointments are available around the clock and will show any open slot after the current time.
                     </div>
 
                     <button type="submit" class="btn-primary">Book Appointment</button>
@@ -476,13 +532,124 @@ footer {
                     document.addEventListener('DOMContentLoaded', function() {
                         const emergencyCheckbox = document.getElementById('is_emergency');
                         const emergencyGroup = document.getElementById('emergencyDetailsGroup');
+                        const appointmentDate = document.getElementById('appointment_date');
+                        const appointmentDateInput = document.getElementById('appointment_date_date');
+                        const doctorSelect = document.getElementById('doctor_id');
+                        const slotContainer = document.getElementById('slot-container');
+                        const slotUrl = '{{ route('appointment.available-slots') }}';
+                        const selectedAppointment = appointmentDate.value;
 
                         function toggleEmergencyDetails() {
                             emergencyGroup.style.display = emergencyCheckbox.checked ? 'block' : 'none';
                         }
 
-                        emergencyCheckbox.addEventListener('change', toggleEmergencyDetails);
+                        function pad(value) {
+                            return value.toString().padStart(2, '0');
+                        }
+
+                        function setDateMin() {
+                            const now = new Date();
+                            const minDate = new Date(now);
+                            if (now.getHours() >= 21) {
+                                minDate.setDate(minDate.getDate() + 1);
+                            }
+                            appointmentDateInput.min = minDate.toISOString().split('T')[0];
+                            if (!appointmentDateInput.value) {
+                                appointmentDateInput.value = appointmentDateInput.min;
+                            }
+                        }
+
+                        function renderSlots(slots) {
+                            slotContainer.innerHTML = '';
+                            if (!slots.length) {
+                                slotContainer.innerHTML = '<p class="slot-placeholder">No available slots for the selected date and doctor. Please choose another day or select Emergency Appointment.</p>';
+                                appointmentDate.value = '';
+                                return;
+                            }
+
+                            let foundSelected = false;
+                            const [oldDate, oldTime] = selectedAppointment ? selectedAppointment.split('T') : [null, null];
+
+                            slots.forEach(function(slot) {
+                                const button = document.createElement('button');
+                                button.type = 'button';
+                                button.className = 'slot-button ' + (slot.available ? 'available' : 'unavailable');
+                                button.textContent = slot.label;
+                                button.dataset.time = slot.time;
+
+                                if (!slot.available) {
+                                    button.disabled = true;
+                                } else {
+                                    button.addEventListener('click', function() {
+                                        selectSlot(button);
+                                    });
+                                }
+
+                                if (oldDate === appointmentDateInput.value && oldTime === slot.time && slot.available) {
+                                    selectSlot(button);
+                                    foundSelected = true;
+                                }
+
+                                slotContainer.appendChild(button);
+                            });
+
+                            if (!foundSelected) {
+                                appointmentDate.value = '';
+                            }
+                        }
+
+                        function selectSlot(button) {
+                            const buttons = slotContainer.querySelectorAll('.slot-button');
+                            buttons.forEach(function(btn) {
+                                btn.classList.remove('selected');
+                            });
+                            button.classList.add('selected');
+                            appointmentDate.value = appointmentDateInput.value + 'T' + button.dataset.time;
+                        }
+
+                        function showLoading() {
+                            slotContainer.innerHTML = '<p class="slot-placeholder">Loading available slots...</p>';
+                        }
+
+                        function fetchSlots() {
+                            if (!doctorSelect.value || !appointmentDateInput.value) {
+                                slotContainer.innerHTML = '<p class="slot-placeholder">Choose a doctor and date to see available 20-minute slots.</p>';
+                                appointmentDate.value = '';
+                                return;
+                            }
+
+                            showLoading();
+                            const params = new URLSearchParams({
+                                doctor_id: doctorSelect.value,
+                                date: appointmentDateInput.value,
+                                is_emergency: emergencyCheckbox.checked ? 1 : 0,
+                            });
+
+                            fetch(`${slotUrl}?${params.toString()}`)
+                                .then(function(response) {
+                                    if (!response.ok) {
+                                        throw new Error('Unable to load slots');
+                                    }
+                                    return response.json();
+                                })
+                                .then(function(data) {
+                                    renderSlots(data.slots || []);
+                                })
+                                .catch(function() {
+                                    slotContainer.innerHTML = '<p class="slot-placeholder">Unable to load slots. Please try again later.</p>';
+                                });
+                        }
+
+                        appointmentDateInput.addEventListener('change', fetchSlots);
+                        doctorSelect.addEventListener('change', fetchSlots);
+                        emergencyCheckbox.addEventListener('change', function() {
+                            toggleEmergencyDetails();
+                            fetchSlots();
+                        });
+
                         toggleEmergencyDetails();
+                        setDateMin();
+                        fetchSlots();
                     });
                 </script>
 
