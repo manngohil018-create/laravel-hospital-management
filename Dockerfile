@@ -19,11 +19,15 @@ COPY . .
 # Install dependencies
 RUN composer install --no-dev --optimize-autoloader
 
-# Generate app key (optional, better via env)
-# RUN php artisan key:generate
+# 🔥 IMPORTANT: permissions fix
+RUN chmod -R 777 storage bootstrap/cache
+
+# 🔥 IMPORTANT: clear cache (avoid 500 errors)
+RUN php artisan config:clear || true
+RUN php artisan cache:clear || true
 
 # Expose port
 EXPOSE 10000
 
-# Start Laravel server
-CMD php artisan serve --host=0.0.0.0 --port=10000
+# 🔥 FINAL COMMAND (AUTO MIGRATE + START SERVER)
+CMD php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=10000
