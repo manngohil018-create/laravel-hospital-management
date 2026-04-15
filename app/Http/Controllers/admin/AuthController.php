@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Admin;
 use  App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -32,32 +33,44 @@ class AuthController extends Controller
 
     // 🔹 LOGIN FUNCTION
     public function login(Request $request)
-{
-    $credentials = $request->validate([
-        'username' => 'required',
-        'password' => 'required',
-    ]);
+    {
+        $credentials = $request->validate([
+            'email' => 'required|email',
+            'password' => 'required',
+        ]);
 
-    if (Auth::attempt($credentials)) {
-        $request->session()->regenerate();
+        // Check if admin exists and credentials match
+        $admin = Admin::where('email', $credentials['email'])->first();
 
-        if(Auth::user()->role == 'admin'){
-            return redirect()->route('admin.dashboard');
+        if ($admin && Hash::check($credentials['password'], $admin->password) && $admin->is_active) {
+            // Log in the admin
+            Auth::login($admin, $request->filled('remember'));
+            $request->session()->regenerate();
+            return redirect()->route('admin.dashboard')->with('success', 'Admin login successful!');
         }
 
-        elseif(Auth::user()->role == 'doctor'){
-            return redirect()->route('doctor.dashboard');
+        // Check if it's a patient/doctor using the User model
+        $user = User::where('email', $credentials['email'])->first();
+
+        if ($user && Hash::check($credentials['password'], $user->password)) {
+            Auth::login($user, $request->filled('remember'));
+            $request->session()->regenerate();
+
+            if($user->role == 'admin'){
+                return redirect()->route('admin.dashboard');
+            }
+            elseif($user->role == 'doctor'){
+                return redirect()->route('doctor.dashboard');
+            }
+            else{
+                return redirect()->route('patient.dashboard');
+            }
         }
 
-        else{
-            return redirect()->route('patient.dashboard');
-        }
+        return back()->withErrors([
+            'email' => 'Invalid email or password',
+        ])->onlyInput('email');
     }
-
-    return back()->withErrors([
-        'username' => 'Invalid Username or Password',
-    ]);
-}
 
 
     // 🔹 DASHBOARD

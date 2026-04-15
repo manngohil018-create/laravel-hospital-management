@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\User;
+use App\Models\Admin;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
@@ -37,7 +38,17 @@ class AuthController extends Controller
 
         $login = $request->login;
         
-        // Attempt login with email, phone, or username
+        // First check if it's admin email
+        if (filter_var($login, FILTER_VALIDATE_EMAIL)) {
+            $admin = Admin::where('email', $login)->first();
+            if ($admin && Hash::check($request->password, $admin->password) && $admin->is_active) {
+                Auth::login($admin);
+                $request->session()->regenerate();
+                return redirect('/admin/dashboard')->with('success', 'Admin login successful!');
+            }
+        }
+
+        // Then check regular user credentials (email, phone, or username)
         $credentials = [];
         if (filter_var($login, FILTER_VALIDATE_EMAIL)) {
             $credentials = ['email' => $login, 'password' => $request->password];
