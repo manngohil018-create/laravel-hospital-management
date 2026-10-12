@@ -231,6 +231,31 @@
         </div>
 
         <div class="form-group">
+            <label for="password">Doctor Login Password *</label>
+            <input
+                type="password"
+                id="password"
+                name="password"
+                autocomplete="new-password"
+                required
+            >
+            @error('password')
+                <span class="error-text">{{ $message }}</span>
+            @enderror
+        </div>
+
+        <div class="form-group">
+            <label for="password_confirmation">Confirm Login Password *</label>
+            <input
+                type="password"
+                id="password_confirmation"
+                name="password_confirmation"
+                autocomplete="new-password"
+                required
+            >
+        </div>
+
+        <div class="form-group">
             <label for="about">About (Optional)</label>
             <textarea 
                 id="about" 

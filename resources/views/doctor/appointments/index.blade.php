@@ -1,7 +1,7 @@
-@extends('layouts.app')
+@extends('layouts.doctor')
 
 @section('content')
-<div class="container" style="max-width:1100px;margin:24px auto">
+<div style="max-width:1100px;margin:24px auto">
     <h2>My Appointments</h2>
 
     @if(session('success'))
@@ -25,11 +25,7 @@
                     <td style="padding:12px">{{ \Carbon\Carbon::parse($appt->appointment_date)->format('d M, Y H:i') }}</td>
                     <td style="padding:12px">{{ ucfirst($appt->status) }}</td>
                     <td style="padding:12px">
-                        <form action="{{ route('doctor.appointment.update-status', $appt->id) }}" method="POST" style="display:inline">
-                            @csrf
-                            <input type="hidden" name="status" value="confirmed">
-                            <button class="btn" type="submit">Confirm</button>
-                        </form>
+                        <a class="btn" href="{{ route('doctor.appointment.show', $appt->id) }}">View</a>
                     </td>
                 </tr>
                 @endforeach

@@ -17,6 +17,8 @@ class Appointment extends Model
         'emergency_details',
         'disease_illness',
         'medical_history',
+        'doctor_instructions',
+        'medicine_list',
     ];
 
     public function patient()

@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\Admin;
 use Closure;
 use Illuminate\Http\Request;
 
@@ -13,7 +14,8 @@ class CheckRole
             return redirect('/login');
         }
 
-        $userRole = auth()->user()->role;
+        $user = auth()->user();
+        $userRole = $user instanceof Admin ? 'admin' : $user->role;
         
         if (!in_array($userRole, $roles)) {
             abort(403, 'Unauthorized access');

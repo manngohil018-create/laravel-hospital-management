@@ -122,6 +122,14 @@ Route::middleware(['auth', 'role:doctor'])
         [DoctorAnalyticsController::class,'index'])
         ->name('analytics');
 
+    Route::get('/appointment/{id}',
+        [DoctorDashboardController::class,'showAppointment'])
+        ->name('appointment.show');
+
+    Route::post('/appointment/{id}/notes',
+        [DoctorDashboardController::class,'updateDoctorNotes'])
+        ->name('appointment.update-notes');
+
     Route::post('/appointment/{id}/status',
         [DoctorDashboardController::class,'updateAppointmentStatus'])
         ->name('appointment.update-status');
@@ -139,7 +147,7 @@ Route::middleware(['auth', 'role:doctor'])
 |--------------------------------------------------------------------------
 */
 
-Route::middleware(['auth','role:admin'])
+Route::middleware(['auth:admin,web','role:admin'])
     ->prefix('admin')
     ->name('admin.')
     ->group(function(){

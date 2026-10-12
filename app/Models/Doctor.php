@@ -19,4 +19,9 @@ class Doctor extends Model
     {
         return $this->hasMany(Appointment::class);
     }
+
+    public function loginAccount()
+    {
+        return $this->hasOne(User::class, 'email', 'email')->where('role', 'doctor');
+    }
 }

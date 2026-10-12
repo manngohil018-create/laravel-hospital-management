@@ -119,7 +119,7 @@
                                             </form>
                                         @endif
 
-                                        <a href="#" style="color:#2563eb;text-decoration:none">View</a>
+                                        <a href="{{ route('doctor.appointment.show', $appt->id) }}" style="color:#2563eb;text-decoration:none">View</a>
                                     </td>
                                 </tr>
                                 @endforeach

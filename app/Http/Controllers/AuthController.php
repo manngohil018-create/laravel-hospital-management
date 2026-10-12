@@ -41,8 +41,12 @@ class AuthController extends Controller
         // First check if it's admin email
         if (filter_var($login, FILTER_VALIDATE_EMAIL)) {
             $admin = Admin::where('email', $login)->first();
-            if ($admin && Hash::check($request->password, $admin->password) && $admin->is_active) {
-                Auth::login($admin);
+            if ($admin) {
+                if (!Hash::check($request->password, $admin->password) || !$admin->is_active) {
+                    return back()->withErrors(['login' => 'Invalid credentials. Please check your email/phone and password.']);
+                }
+
+                Auth::guard('admin')->login($admin);
                 $request->session()->regenerate();
                 return redirect('/admin/dashboard')->with('success', 'Admin login successful!');
             }
@@ -77,7 +81,8 @@ class AuthController extends Controller
 
     public function logout(Request $request)
     {
-        Auth::logout();
+        Auth::guard('web')->logout();
+        Auth::guard('admin')->logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
         return redirect('/');

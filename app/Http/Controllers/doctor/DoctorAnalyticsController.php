@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Doctor;
 
 use App\Http\Controllers\Controller;
 use App\Models\Appointment;
+use App\Models\Doctor;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -11,7 +12,7 @@ class DoctorAnalyticsController extends Controller
 {
     public function index()
     {
-        $doctor = Auth::user();
+        $doctor = Doctor::where('email', Auth::user()->email)->firstOrFail();
 
         $totalAppointments = Appointment::where('doctor_id', $doctor->id)->count();
         $completedAppointments = Appointment::where('doctor_id', $doctor->id)

@@ -1,160 +1,229 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Lifecare Hospital - Register</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lifecare Hospital - Register</title>
+    <style>
+        :root {
+            --navy-900: #0f172a;
+            --navy-800: #16213e;
+            --teal-700: #0f5438;
+            --teal-600: #1d7a66;
+            --gray-200: #e5e7eb;
+            --gray-500: #64748b;
+            --white: #ffffff;
+            --danger: #b91c1c;
+            --shadow: 0 18px 45px rgba(15, 23, 42, 0.16);
+        }
 
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+        * {
+            box-sizing: border-box;
+        }
 
-<style>
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            background: linear-gradient(135deg, var(--navy-900) 0%, var(--navy-800) 48%, var(--teal-700) 100%);
+            font-family: Arial, Helvetica, sans-serif;
+            color: var(--navy-900);
+        }
 
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-    font-family:'Poppins',sans-serif;
-}
+        .auth-card {
+            width: min(100%, 480px);
+            background: rgba(255, 255, 255, 0.98);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+            padding: 32px 28px;
+        }
 
-body{
-    height:100vh;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    background: 
-    linear-gradient(rgba(0, 114, 255, 0.6), rgba(0, 198, 255, 0.6)),
-    url('https://images.unsplash.com/photo-1586773860418-d37222d8fce3');
-    background-size:cover;
-    background-position:center;
-}
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 18px;
+        }
 
-.register-container{
-    width:420px;
-    padding:40px;
-    border-radius:15px;
-    background:rgba(255,255,255,0.95);
-    box-shadow:0 10px 40px rgba(0,0,0,0.3);
-    text-align:center;
-}
+        .brand-mark {
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            background: #eaf7f3;
+            color: var(--teal-700);
+            font-weight: 700;
+            font-size: 1.5rem;
+        }
 
-.register-container h2{
-    margin-bottom:20px;
-    color:#0072ff;
-}
+        .brand-copy {
+            line-height: 1.2;
+        }
 
-.input-group{
-    position:relative;
-    margin-bottom:18px;
-}
+        .brand-copy strong {
+            display: block;
+            font-size: 1.15rem;
+        }
 
-.input-group input{
-    width:100%;
-    padding:12px 40px;
-    border:1px solid #ccc;
-    border-radius:30px;
-    outline:none;
-    transition:0.3s;
-}
+        .brand-copy span {
+            color: var(--gray-500);
+            font-size: 0.8rem;
+        }
 
-.input-group input:focus{
-    border-color:#0072ff;
-    box-shadow:0 0 5px rgba(0,114,255,0.5);
-}
+        h1 {
+            margin: 0 0 22px;
+            font-size: 2rem;
+            color: var(--teal-700);
+            text-align: center;
+        }
 
-.input-group i{
-    position:absolute;
-    left:15px;
-    top:50%;
-    transform:translateY(-50%);
-    color:#0072ff;
-}
+        .message-text {
+            margin: 0 0 16px;
+            padding: 10px 12px;
+            border-radius: 10px;
+            background: #ecfdf5;
+            color: #166534;
+            font-size: 0.95rem;
+        }
 
-button{
-    width:100%;
-    padding:12px;
-    border:none;
-    border-radius:30px;
-    background:linear-gradient(to right,#00c6ff,#0072ff);
-    color:#fff;
-    font-weight:600;
-    cursor:pointer;
-    transition:0.3s;
-}
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
 
-button:hover{
-    transform:scale(1.05);
-}
+        .field {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
 
-.footer-text{
-    margin-top:15px;
-    font-size:14px;
-}
+        label {
+            font-size: 0.92rem;
+            font-weight: 600;
+            color: var(--navy-800);
+        }
 
-.footer-text a{
-    color:#0072ff;
-    text-decoration:none;
-}
+        input {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1px solid var(--gray-200);
+            border-radius: 10px;
+            font-size: 1rem;
+            background: var(--white);
+            color: var(--navy-900);
+        }
 
-.is-invalid{
-    border:2px solid red !important;
-}
+        input:focus {
+            border-color: var(--teal-600);
+            outline: 3px solid rgba(29, 122, 102, 0.12);
+        }
 
-</style>
+        .error-message {
+            margin: -6px 0 0;
+            color: var(--danger);
+            font-size: 0.85rem;
+        }
+
+        .button-primary {
+            width: 100%;
+            border: none;
+            border-radius: 10px;
+            background: var(--teal-700);
+            color: var(--white);
+            padding: 12px 16px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .button-primary:hover,
+        .button-primary:focus {
+            background: var(--teal-600);
+        }
+
+        .footer-text {
+            margin: 20px 0 0;
+            text-align: center;
+            color: var(--gray-500);
+            font-size: 0.95rem;
+        }
+
+        .footer-text a {
+            color: var(--teal-700);
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        .footer-text a:hover,
+        .footer-text a:focus {
+            text-decoration: underline;
+        }
+    </style>
 </head>
 <body>
-
-<div class="register-container">
-    <h2><i class="fa-solid fa-hospital"></i> Lifecare Register</h2>
-
-    <form method="POST" action="{{ route('register.store') }}">
-        @csrf
-
-        <!-- Username -->
-        <div class="input-group">
-            <i class="fa-solid fa-id-card"></i>
-            <input type="text" name="username" placeholder="Username" value="{{ old('username') }}" required>
-        </div>
-        @error('username')
-           <small style="color:red;">{{ $message }}</small>
-        @enderror
-
-        <!-- Email -->
-        <div class="input-group">
-            <i class="fa-solid fa-envelope"></i>
-            <input type="email" name="email" placeholder="Email Address" value="{{ old('email') }}" required>
-        </div>
-        @error('email')
-           <small style="color:red;">{{ $message }}</small>
-        @enderror
-
-        <!-- Password -->
-        <div class="input-group">
-            <i class="fa-solid fa-lock"></i>
-            <input type="password" name="password" placeholder="Password" required>
-        </div>
-        @error('password')
-           <small style="color:red;">{{ $message }}</small>
-        @enderror
-
-        <!-- Confirm Password -->
-        <div class="input-group">
-            <i class="fa-solid fa-lock"></i>
-            <input type="password" name="password_confirmation" placeholder="Confirm Password" required>
-        </div>
-        @error('password_confirmation')
-           <small style="color:red;">{{ $message }}</small>
-        @enderror
-
-        <button type="submit">Create Account</button>
-
-        <div class="footer-text">
-            Already have an account?
-            <a href="{{ route('login') }}">Login Here</a>
+    <div class="auth-card">
+        <div class="brand" aria-label="Lifecare branding">
+            <div class="brand-mark">+</div>
+            <div class="brand-copy">
+                <strong>Lifecare</strong>
+                <span>Hospital Access</span>
+            </div>
         </div>
 
-    </form>
-</div>
+        <h1>Register</h1>
 
+        @if (session('success'))
+            <p class="message-text">{{ session('success') }}</p>
+        @endif
+
+        <form method="POST" action="/register">
+            @csrf
+
+            <div class="field">
+                <label for="username">Username</label>
+                <input id="username" type="text" name="username" value="{{ old('username') }}" required>
+            </div>
+            @error('username')
+                <p class="error-message">{{ $message }}</p>
+            @enderror
+
+            <div class="field">
+                <label for="email">Email address</label>
+                <input id="email" type="email" name="email" value="{{ old('email') }}" required>
+            </div>
+            @error('email')
+                <p class="error-message">{{ $message }}</p>
+            @enderror
+
+            <div class="field">
+                <label for="password">Password</label>
+                <input id="password" type="password" name="password" required>
+            </div>
+            @error('password')
+                <p class="error-message">{{ $message }}</p>
+            @enderror
+
+            <div class="field">
+                <label for="password_confirmation">Confirm password</label>
+                <input id="password_confirmation" type="password" name="password_confirmation" required>
+            </div>
+            @error('password_confirmation')
+                <p class="error-message">{{ $message }}</p>
+            @enderror
+
+            <button type="submit" class="button-primary">Create Account</button>
+        </form>
+
+        <p class="footer-text">
+            Already have an account? <a href="/login">Login</a>
+        </p>
+    </div>
 </body>
 </html>

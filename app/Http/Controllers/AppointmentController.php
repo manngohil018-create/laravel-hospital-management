@@ -197,17 +197,12 @@ class AppointmentController extends Controller
 
     public function doctorAppointments()
     {
-        $doctor = Auth::user();
-        
-        if ($doctor->role !== 'doctor') {
-            abort(403, 'Unauthorized');
-        }
+        $doctor = Doctor::where('email', Auth::user()->email)->firstOrFail();
 
         $appointments = Appointment::where('doctor_id', $doctor->id)
-            ->with(['patient'])
+            ->with(['patient', 'doctor'])
             ->paginate(10);
 
         return view('doctor.appointments.index', compact('appointments'));
     }
 }
-
