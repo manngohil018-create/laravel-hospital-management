@@ -86,20 +86,9 @@
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
 <script>
-    // Monthly Chart
-    const monthlyCtx = document.getElementById('monthlyChart').getContext('2d');
-    const monthlyData = {
-        @foreach($monthlyAppointments as $item)
-            '{{ $item->month }}': {{ $item->count }},
-        @endforeach
-    };
-    
     const monthlyLabels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    const monthlyValues = [];
-    for(let i = 1; i <= 12; i++) {
-        const key = String(i).padStart(2, '0');
-        monthlyValues.push(monthlyData[key] || 0);
-    }
+    const monthlyValues = @json(array_values($monthlyAppointments));
+    const monthlyCtx = document.getElementById('monthlyChart').getContext('2d');
 
     new Chart(monthlyCtx, {
         type: 'line',

@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AppointmentController;
+use App\Http\Controllers\ContactController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\DoctorController;
 use App\Http\Controllers\Admin\PatientController;
@@ -44,6 +45,9 @@ Route::get('/services', function () {
 Route::get('/contact', function () {
     return view('contact');
 })->name('contact');
+
+Route::post('/contact', [ContactController::class, 'store'])
+    ->name('contact.store');
 
 // Book Appointment Route
 Route::get('/book-appointment/{doctor?}', [AppointmentController::class, 'create'])

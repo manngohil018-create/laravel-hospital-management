@@ -24,9 +24,6 @@ header {
     background: linear-gradient(135deg, #003D7A 0%, #0066CC 100%);
     color: white;
     padding: 15px 0;
-    position: sticky;
-    top: 0;
-    z-index: 100;
     box-shadow: 0 5px 15px rgba(0,0,0,0.1);
 }
 
@@ -172,6 +169,102 @@ section h2::after {
     font-weight: 600;
 }
 
+.contact-form {
+    max-width: 820px;
+    margin: 55px auto 0;
+    padding: 32px;
+    border: 1px solid #dce5ed;
+    border-radius: 8px;
+    background: #f8fafc;
+}
+
+.contact-form h3 {
+    margin-bottom: 8px;
+    color: #003D7A;
+    font-size: 24px;
+}
+
+.contact-form-intro {
+    margin-bottom: 24px;
+    color: #596579;
+}
+
+.contact-form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+}
+
+.contact-form-field {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+.contact-form-field-full {
+    grid-column: 1 / -1;
+}
+
+.contact-form label {
+    color: #24364b;
+    font-weight: 600;
+}
+
+.contact-form input,
+.contact-form textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #b8c5d1;
+    border-radius: 5px;
+    background: #fff;
+    color: #263445;
+    font: inherit;
+}
+
+.contact-form input:focus,
+.contact-form textarea:focus {
+    border-color: #0066CC;
+    outline: 3px solid rgba(0, 102, 204, 0.18);
+}
+
+.contact-form textarea {
+    min-height: 150px;
+    resize: vertical;
+}
+
+.contact-form-error {
+    color: #b42318;
+    font-size: 14px;
+}
+
+.contact-form-status {
+    margin-bottom: 20px;
+    padding: 12px 16px;
+    border-radius: 5px;
+}
+
+.contact-form-success {
+    background: #e8f5ee;
+    color: #17663a;
+}
+
+.contact-form-submit {
+    margin-top: 20px;
+    padding: 12px 22px;
+    border: 0;
+    border-radius: 5px;
+    background: #003D7A;
+    color: #fff;
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.contact-form-submit:focus-visible {
+    outline: 3px solid #0066CC;
+    outline-offset: 3px;
+}
+
 /* Footer */
 footer {
     background: #1a1a2e;
@@ -209,6 +302,18 @@ footer {
         grid-template-columns: 1fr;
     }
 
+    .contact-form {
+        padding: 22px;
+    }
+
+    .contact-form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .contact-form-field-full {
+        grid-column: auto;
+    }
+
     section {
         padding: 50px 20px;
     }
@@ -220,6 +325,7 @@ footer {
 </style>
 </head>
 <body>
+@include('partials.diwali-chat-assistant')
 
 <!-- Navigation -->
 <header>
@@ -318,6 +424,62 @@ footer {
                 </div>
             </div>
         </div>
+
+        <form class="contact-form" action="{{ route('contact.store') }}" method="POST">
+            @csrf
+            <h3>Send Us a Message</h3>
+            <p class="contact-form-intro">Send your message or question to LifeCare Hospital using this form.</p>
+
+            @if (session('success'))
+                <div class="contact-form-status contact-form-success" role="status">
+                    {{ session('success') }}
+                </div>
+            @endif
+
+            <div class="contact-form-grid">
+                <div class="contact-form-field">
+                    <label for="contact-name">Name</label>
+                    <input id="contact-name" name="name" type="text" value="{{ old('name') }}" maxlength="120" required autocomplete="name" @error('name') aria-describedby="contact-name-error" aria-invalid="true" @enderror>
+                    @error('name')
+                        <span class="contact-form-error" id="contact-name-error">{{ $message }}</span>
+                    @enderror
+                </div>
+
+                <div class="contact-form-field">
+                    <label for="contact-email">Email</label>
+                    <input id="contact-email" name="email" type="email" value="{{ old('email') }}" maxlength="255" required autocomplete="email" @error('email') aria-describedby="contact-email-error" aria-invalid="true" @enderror>
+                    @error('email')
+                        <span class="contact-form-error" id="contact-email-error">{{ $message }}</span>
+                    @enderror
+                </div>
+
+                <div class="contact-form-field">
+                    <label for="contact-phone">Phone <span>(optional)</span></label>
+                    <input id="contact-phone" name="phone" type="tel" value="{{ old('phone') }}" maxlength="30" autocomplete="tel" @error('phone') aria-describedby="contact-phone-error" aria-invalid="true" @enderror>
+                    @error('phone')
+                        <span class="contact-form-error" id="contact-phone-error">{{ $message }}</span>
+                    @enderror
+                </div>
+
+                <div class="contact-form-field">
+                    <label for="contact-subject">Subject</label>
+                    <input id="contact-subject" name="subject" type="text" value="{{ old('subject') }}" maxlength="150" required @error('subject') aria-describedby="contact-subject-error" aria-invalid="true" @enderror>
+                    @error('subject')
+                        <span class="contact-form-error" id="contact-subject-error">{{ $message }}</span>
+                    @enderror
+                </div>
+
+                <div class="contact-form-field contact-form-field-full">
+                    <label for="contact-message">Message</label>
+                    <textarea id="contact-message" name="message" maxlength="5000" required @error('message') aria-describedby="contact-message-error" aria-invalid="true" @enderror>{{ old('message') }}</textarea>
+                    @error('message')
+                        <span class="contact-form-error" id="contact-message-error">{{ $message }}</span>
+                    @enderror
+                </div>
+            </div>
+
+            <button class="contact-form-submit" type="submit">Send Message</button>
+        </form>
     </div>
 </section>
 
@@ -326,11 +488,6 @@ footer {
     <div class="footer-content">
         <h3>LifeCare Hospital</h3>
         <p>Providing excellent healthcare services to our community since 2020</p>
-        <div class="footer-links">
-            <a href="#"><i class="fab fa-facebook"></i> Facebook</a>
-            <a href="#"><i class="fab fa-twitter"></i> Twitter</a>
-            <a href="#"><i class="fab fa-instagram"></i> Instagram</a>
-        </div>
         <p>&copy; 2026 LifeCare Hospital. All Rights Reserved.</p>
     </div>
 </footer>

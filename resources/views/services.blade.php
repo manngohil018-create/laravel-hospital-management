@@ -24,9 +24,6 @@ header {
     background: linear-gradient(135deg, #003D7A 0%, #0066CC 100%);
     color: white;
     padding: 15px 0;
-    position: sticky;
-    top: 0;
-    z-index: 100;
     box-shadow: 0 5px 15px rgba(0,0,0,0.1);
 }
 
@@ -247,6 +244,7 @@ footer {
 </style>
 </head>
 <body>
+@include('partials.diwali-chat-assistant')
 
 <!-- Navigation -->
 <header>
@@ -360,11 +358,6 @@ footer {
     <div class="footer-content">
         <h3>LifeCare Hospital</h3>
         <p>Providing excellent healthcare services to our community since 2020</p>
-        <div class="footer-links">
-            <a href="#"><i class="fab fa-facebook"></i> Facebook</a>
-            <a href="#"><i class="fab fa-twitter"></i> Twitter</a>
-            <a href="#"><i class="fab fa-instagram"></i> Instagram</a>
-        </div>
         <p>&copy; 2026 LifeCare Hospital. All Rights Reserved.</p>
     </div>
 </footer>
